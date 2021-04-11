@@ -1,0 +1,15 @@
+{
+    "name": "imsglobal/lti-1p3-simple",
+    "type": "project",
+    "description": "Example project using the LTI 1.3 Advantage library",
+    "authors": [
+        {
+            "name": "Martin Lenord",
+            "email": "ims.m@rtin.dev"
+        }
+    ],
+    "require": {
+        "fproject/php-jwt": "^4.0",
+        "phpseclib/phpseclib": "^2.0"
+    }
+}
