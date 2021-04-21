@@ -74,29 +74,12 @@ jMhbU+jrqRIJKisP7MCE1NRhymCPpQf/stEPl0nS5rj+mZJHQEGq
 );
 
 INSERT INTO lti_registration VALUES(
-    '56f3d0ed-0e0a-4ba5-a5a2-59aa4bbe6b57',
-    'https://blackboard.com',
-    '18770476-af5d-4037-9d7e-649fd65b4f7d',
-    'https://developer.blackboard.com/api/v1/gateway/oidcauth',
-    'https://developer.blackboard.com/api/v1/gateway/oauth2/jwttoken',
-    'https://developer.blackboard.com/api/v1/management/applications/18770476-af5d-4037-9d7e-649fd65b4f7d/jwks.json',
-    NULL,
-    'd48a53de-021f-46f7-a0a4-7134812c2235'
-);
-
-INSERT INTO lti_deployment VALUES(
-    '2511a84e-a62b-4d12-a541-f253658439a1',
-    '56f3d0ed-0e0a-4ba5-a5a2-59aa4bbe6b57',
-    'Example Customer'
-);
-
-INSERT INTO lti_registration VALUES(
     '56f3d0ed-0e0a-4ba5-a5a2-59aa4bbe6b59',
     'http://localhost:9001',
     'd42df408-70f5-4b60-8274-6c98d3b9468d',
     'http://my.platform:9001/platform/login.php',
-    'http://my.platform:9001/platform/login.php',
-    'http://my.platform:9001/platform/jwks.php',
+    'http://localhost/platform/token.php',
+    'http://localhost/platform/jwks.php',
     NULL,
     'd48a53de-021f-46f7-a0a4-7134812c2235'
 );
