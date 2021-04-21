@@ -1,6 +1,6 @@
 <?
 
-include_once '../vendor/autoload.php';
+include_once __DIR__ . '/../vendor/autoload.php';
 
 use phpseclib\Crypt\RSA;
 use \Firebase\JWT\JWT;

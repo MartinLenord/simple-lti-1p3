@@ -89,3 +89,20 @@ INSERT INTO lti_deployment VALUES(
     '56f3d0ed-0e0a-4ba5-a5a2-59aa4bbe6b57',
     'Example Customer'
 );
+
+INSERT INTO lti_registration VALUES(
+    '56f3d0ed-0e0a-4ba5-a5a2-59aa4bbe6b59',
+    'http://localhost:9001',
+    'd42df408-70f5-4b60-8274-6c98d3b9468d',
+    'http://my.platform:9001/platform/login.php',
+    'http://my.platform:9001/platform/login.php',
+    'http://my.platform:9001/platform/jwks.php',
+    NULL,
+    'd48a53de-021f-46f7-a0a4-7134812c2235'
+);
+
+INSERT INTO lti_deployment VALUES(
+    '8c49a5fa-f955-405e-865f-3d7e959e809f',
+    '56f3d0ed-0e0a-4ba5-a5a2-59aa4bbe6b59',
+    'Example Customer'
+);
