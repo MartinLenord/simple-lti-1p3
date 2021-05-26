@@ -147,6 +147,11 @@ if ($id_token_body['https://purl.imsglobal.org/spec/lti/claim/message_type'] ===
                 "simpleness" => "3.1419...",
                 "sub" => '$Resource.submission.endDateTime'
             ],
+            "lineItem" => [
+                "label" => "Auto-Created Lineitem",
+                "scoreMaximum" => 100,
+                "tag" => "participation",
+            ]
         ]],
         "https://purl.imsglobal.org/spec/lti-dl/claim/data" => $id_token_body['https://purl.imsglobal.org/spec/lti-dl/claim/deep_linking_settings']['data'],
     ];
@@ -161,6 +166,7 @@ if ($id_token_body['https://purl.imsglobal.org/spec/lti/claim/message_type'] ===
         <input type="submit" value="Do Deep Link"/>
     </form>
     <?
+    die;
 }
 
 /*
@@ -187,7 +193,12 @@ $service_auth_request = [
     'grant_type' => 'client_credentials',
     'client_assertion_type' => 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
     'client_assertion' => $service_jwt,
-    'scope' => 'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly'
+    'scope' => implode(' ', [
+        'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly',
+        'https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly',
+        'https://purl.imsglobal.org/spec/lti-ags/scope/score',
+        'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
+    ]),
 ];
 
 $ch = curl_init();
@@ -241,12 +252,72 @@ while ($next_page) {
 }
 
 /*
-    Output Service Response
+    Output Names and Roles Service Response
 */
 
 ?>
 <h2>Names and Roles</h2>
 <code style="width:700px;height:700px;white-space:pre"><?
 echo json_encode($members, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+?></code>
+<?
+
+/*
+    Find first Learner
+*/
+$user_to_score = false;
+foreach ($members as $member) {
+    if (array_search('http://purl.imsglobal.org/vocab/lis/v2/membership#Learner', $member['roles']) !== false) {
+        $user_to_score = $member['user_id'];
+        break;
+    }
+}
+
+/*
+    Use access token to send random grade using the Assignments and Grades service
+*/
+
+$lineitem = $id_token_body['https://purl.imsglobal.org/spec/lti-ags/claim/endpoint']['lineitem'];
+
+$ch = curl_init();
+$headers = [
+    'Authorization: Bearer ' . $token_data['access_token'],
+    'Content-Type: application/vnd.ims.lis.v1.score+json',
+];
+$body = json_encode([
+    "scoreGiven" => random_int(0, 100),
+    "scoreMaximum" => 100,
+    "activityProgress" => 'Completed',
+    "gradingProgress" => 'FullyGraded',
+    "timestamp" => date(DateTime::ISO8601),
+    "userId" => $user_to_score,
+]);
+
+curl_setopt($ch, CURLOPT_URL, $lineitem . '/scores');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, 1);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, strval($body));
+$response = curl_exec($ch);
+$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+curl_close ($ch);
+
+$resp_headers = substr($response, 0, $header_size);
+$resp_body = substr($response, $header_size);
+$page = [
+    'headers' => array_filter(explode("\r\n", $resp_headers)),
+    'body' => json_decode($resp_body, true),
+];
+
+/*
+    Output Service Response
+*/
+
+?>
+<h2>Assignments and Grades response</h2>
+<code style="width:700px;height:700px;white-space:pre"><?
+echo json_encode($page['body'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 ?></code>
 <?
