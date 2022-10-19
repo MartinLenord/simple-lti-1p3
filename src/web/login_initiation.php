@@ -13,26 +13,16 @@ $result = pg_query_params(
 );
 
 if (!$result) {
+    echo 'Missing registration';
     die;
 }
 
 $registration = pg_fetch_assoc($result);
 
 if (empty($registration)) {
+    echo 'Missing registration';
     die;
 }
-
-/*
-    Store Cookie in state
-*/
-
-$state = str_replace('.', '_', uniqid('state-', true));
-setcookie("lti1p3_$state", $state, [
-    'expires' => time() + 60,
-    'samesite' => 'None',
-    'secure' => true,
-    'path' => '/'
-]);
 
 /*
     Build Response
@@ -45,17 +35,44 @@ $auth_params = [
     'prompt'           => 'none', // Don't prompt user on redirect.
     'client_id'        => $registration['client_id'], // Registered client id.
     'redirect_uri'     => 'https://lti-simple.ngrok.io/launch.php', // URL to return to after login.
-    'state'            => $state, // State to identify browser session.
-    'nonce'            => uniqid('nonce-', true), // Prevent replay attacks.
     'login_hint'       => $_REQUEST['login_hint'], // Login hint to identify platform session.
     'lti_message_hint' => $_REQUEST['lti_message_hint'] // Login hint to identify platform session.
 ];
 
-/*
-    Redirect back to platform
-*/
-
-header('Location: ' . $registration['platform_login_auth_endpoint']. '?' . http_build_query($auth_params), true, 302);
-die;
-
 ?>
+<script src="/static/ltistorage.js"></script>
+<body></body>
+<script>
+
+    let params = <?= json_encode($auth_params) ?>;
+
+
+    let storage = new LtiStorage(true);
+    storage.initToolLogin(new URL(<?= json_encode($registration['platform_login_auth_endpoint']); ?>), params);
+
+    // ## 1 ##
+    // params.state = "<?= uniqid('', true) ?>";
+    // params.nonce = "<?= uniqid('', true) ?>";
+    // document.cookie = 'lti_state_' + params.state + '=' + params.state + '; path=/; samesite=none; secure; expires=' + (new Date(Date.now() + 300*1000)).toUTCString();
+    // document.cookie = 'lti_nonce_' + params.nonce + '=' + params.nonce + '; path=/; samesite=none; secure; expires=' + (new Date(Date.now() + 300*1000)).toUTCString();
+
+
+    // let form = document.createElement("form");
+    // for (let key in params) {
+    //     let element = document.createElement("input");
+    //     element.type = 'hidden';
+    //     element.value = params[key];
+    //     element.name = key;
+    //     form.appendChild(element);
+    // };
+
+    // form.method = "POST";
+    // form.action = <?= json_encode($registration['platform_login_auth_endpoint']); ?>;
+
+    // document.body.appendChild(form);
+
+    // form.submit();
+    // ## 1 ## END
+
+
+</script>
